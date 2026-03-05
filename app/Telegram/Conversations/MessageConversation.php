@@ -12,14 +12,15 @@ class MessageConversation extends Conversation
 {
     protected string $type = 'murojaat';
     protected ?string $fullName = null;
+    protected ?string $group = null;
+    protected ?string $phone = null;
 
     public function start(Nutgram $bot, string $type = 'murojaat'): void
     {
         $this->type = $type;
 
         $bot->sendMessage(
-            text: "👤 *Iltimos, to'liq ism\-familiyangizni kiriting:*\n\n_Masalan: Aliyev Vali G'aniyevich_",
-            parse_mode: 'MarkdownV2',
+            text: "👤 To'liq ism-familiyangizni kiriting:\n\nMasalan: Aliyev Vali G'aniyevich",
         );
 
         $this->next('handleName');
@@ -38,9 +39,53 @@ class MessageConversation extends Conversation
 
         $this->fullName = $name;
 
+        $bot->sendMessage(
+            text: "🏫 Guruhingizni kiriting:\n\nMasalan: 401-22-ATXJ",
+        );
+
+        $this->next('handleGroup');
+    }
+
+    public function handleGroup(Nutgram $bot): void
+    {
+        $group = $bot->message()->text;
+
+        if (empty($group) || mb_strlen($group) < 2) {
+            $bot->sendMessage(
+                text: "⚠️ Iltimos, guruhingizni to'g'ri kiriting.",
+            );
+            return;
+        }
+
+        $this->group = $group;
+
+        $bot->sendMessage(
+            text: "📞 Qayta bog'lanish uchun telefon raqamingizni kiriting:\n\nMasalan: +998901234567",
+        );
+
+        $this->next('handlePhone');
+    }
+
+    public function handlePhone(Nutgram $bot): void
+    {
+        $phone = $bot->message()->text;
+
+        if (empty($phone) || mb_strlen($phone) < 9) {
+            $bot->sendMessage(
+                text: "⚠️ Iltimos, telefon raqamingizni to'g'ri kiriting.",
+            );
+            return;
+        }
+
+        $this->phone = $phone;
+
         $user = User::where('telegram_id', $bot->userId())->first();
         if ($user) {
-            $user->update(['info' => $name]);
+            $user->update([
+                'name' => $this->fullName,
+                'phone' => $this->phone,
+                'group' => $this->group,
+            ]);
         }
 
         $label = $this->type === 'shikoyat' ? 'shikoyatingizni' : 'murojaatingizni';
@@ -79,6 +124,8 @@ class MessageConversation extends Conversation
         $bot->sendMessage(
             text: "✅ {$label} muvaffaqiyatli qabul qilindi!\n\n"
                 . "👤 Kimdan: {$this->fullName}\n"
+                . "🏫 Guruh: {$this->group}\n"
+                . "📞 Telefon: {$this->phone}\n"
                 . "📝 Turi: {$typeLabel}\n\n"
                 . "⏳ Javob berilganda sizga xabar yuboriladi.",
             reply_markup: KeyboardHelper::mainMenu(),

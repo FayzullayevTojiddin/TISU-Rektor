@@ -4,6 +4,8 @@ use App\Models\User;
 use App\Telegram\Conversations\MessageConversation;
 use App\Telegram\Helpers\KeyboardHelper;
 use SergiX44\Nutgram\Nutgram;
+use SergiX44\Nutgram\Telegram\Types\Keyboard\InlineKeyboardButton;
+use SergiX44\Nutgram\Telegram\Types\Keyboard\InlineKeyboardMarkup;
 
 $bot->onCommand('start', function (Nutgram $bot) {
     $telegramUser = $bot->user();
@@ -52,9 +54,14 @@ $bot->onText('📣 Telegram kanal', function (Nutgram $bot) {
         text: "📣 TISU rasmiy Telegram kanali\n\n"
             . "Universitetning so'nggi yangiliklari, e'lonlar va muhim "
             . "ma'lumotlardan doimo xabardor bo'lib boring.\n\n"
-            . "👉 @tisu_2022\n\n"
             . "✅ Obuna bo'ling va hech qanday yangilikni o'tkazib yubormang!",
-        reply_markup: KeyboardHelper::mainMenu(),
+        reply_markup: InlineKeyboardMarkup::make()
+            ->addRow(
+                InlineKeyboardButton::make(
+                    text: '📣 Kanalga o\'tish',
+                    url: 'https://t.me/tisu_2022',
+                ),
+            ),
     );
 });
 
@@ -63,9 +70,14 @@ $bot->onText('🌐 Web sahifa', function (Nutgram $bot) {
         text: "🌐 TISU rasmiy veb-sahifasi\n\n"
             . "Universitet haqida to'liq ma'lumot, yangiliklar, "
             . "qabul jarayonlari va boshqa foydali resurslar.\n\n"
-            . "🔗 tues.uz\n\n"
             . "📖 Sahifani muntazam kuzatib boring!",
-        reply_markup: KeyboardHelper::mainMenu(),
+        reply_markup: InlineKeyboardMarkup::make()
+            ->addRow(
+                InlineKeyboardButton::make(
+                    text: '🌐 Saytga o\'tish',
+                    url: 'https://tues.uz',
+                ),
+            ),
     );
 });
 
