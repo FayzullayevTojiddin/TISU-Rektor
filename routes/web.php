@@ -7,6 +7,9 @@ Route::get('/', function () {
     return view('welcome');
 });
 
-Route::post('/' . env('TELEGRAM_TOKEN') . '/webhook', function (Nutgram $bot) {
+Route::post('/{token}/webhook', function (Nutgram $bot, string $token) {
+    if ($token !== config('nutgram.token')) {
+        abort(404);
+    }
     $bot->run();
-});
+})->where('token', '.*');
